@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouhara Free WiFi - النظام المتكامل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* زر التبديل العائم */
+        .floating-button {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+        }
+
+        .toggle-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(239, 68, 68, 0.6);
+        }
+
+        /* واجهة التلاميذ */
+        .student-view {
+            max-width: 500px;
+            margin: 0 auto;
+            padding-top: 50px;
+        }
+
+        .wifi-card {
+            background: white;
+            border-radius: 20px;
+            padding: 45px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wifi-icon {
+            text-align: center;
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: rotate 3s infinite;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        .wifi-name {
+            text-align: center;
+            font-size: 2.2em;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .wifi-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 35px;
+        }
+
+        .free-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .features {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-connect {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .success-message {
+            display: none;
+            background: #dcfce7;
+            border: 2px solid #10b981;
+            color: #166534;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* شاشة المراقبة */
+        .monitor-view {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .monitor-view.show {
+            display: block;
+        }
+
+        .monitor-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .monitor-header h1 {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .monitor-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .stat-value {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .devices-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .devices-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .device-card {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            animation: deviceAppear 0.5s ease-out;
+        }
+
+        @keyframes deviceAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .device-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .device-name {
+            font-size: 1.3em;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .device-time {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        .device-info {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .device-info-item {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .new-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+            display: none;
+            font-weight: 600;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+            grid-column: 1/-1;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .monitor-stats {
+                grid-template-columns: 1fr;
+            }
+            .devices-grid {
+                grid-template-columns: 1fr;
+            }
+            .floating-button {
+                bottom: 15px;
+                left: 15px;
+            }
+            .toggle-btn {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- زر التبديل العائم -->
+    <div class="floating-button">
+        <button class="toggle-btn" id="toggleBtn" onclick="toggleView()">
+            <span id="btnText">🎯 عرض المراقبة</span>
+        </button>
+    </div>
+
+    <!-- إشعار اتصال جديد -->
+    <div class="notification" id="notification">
+        🔔 جهاز جديد متصل!
+    </div>
+
+    <!-- واجهة التلاميذ -->
+    <div class="student-view" id="studentView">
+        <div class="wifi-card">
+            <div class="wifi-icon">📶</div>
+            
+            <div class="wifi-name">Bouhara_free_Wifi</div>
+            <div class="wifi-subtitle">
+                <span class="free-badge">✓ مجاني تماماً</span>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <span style="font-size: 1.5em;">🚀</span>
+                    <span>سرعة عالية جداً - 100 Mbps</span>
+                </div>
+                <div class="feature-item">
+                    <span style="font-size: 1.5em;">🔓</span>
+                    <span>بدون كلمة مرور</span>
+                </div>
+                <div class="feature-item">
+                    <span style="font-size: 1.5em;">⚡</span>
+                    <span>اتصال فوري ومباشر</span>
+                </div>
+            </div>
+
+            <form id="connectForm" onsubmit="return registerDevice(event)">
+                <div class="form-group">
+                    <label class="form-label">اسمك:</label>
+                    <input type="text" class="form-input" id="studentName" required placeholder="أدخل اسمك...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">نوع جهازك:</label>
+                    <input type="text" class="form-input" id="deviceType" required placeholder="مثال: iPhone 15, Samsung Galaxy...">
+                </div>
+
+                <button type="submit" class="btn-connect">
+                    🔗 اتصل الآن مجاناً
+                </button>
+            </form>
+
+            <div class="success-message" id="successMsg">
+                ✓ تم الاتصال بنجاح! أنت الآن متصل بالشبكة.
+            </div>
+        </div>
+    </div>
+
+    <!-- شاشة المراقبة -->
+    <div class="monitor-view" id="monitorView">
+        <div class="monitor-header">
+            <h1>🎯 شاشة المراقبة - Bouhara_free_Wifi</h1>
+            <p style="font-size: 1.1em; opacity: 0.9;">مراقبة فورية للأجهزة المتصلة • تحديث تلقائي كل 2 ثانية</p>
+        </div>
+
+        <div class="monitor-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalConnected">0</div>
+                <div class="stat-label">إجمالي المتصلين</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeNow">0</div>
+                <div class="stat-label">متصلين حالياً</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="dataTransfer">0 MB</div>
+                <div class="stat-label">البيانات المنقولة</div>
+            </div>
+        </div>
+
+        <div class="devices-container">
+            <div class="devices-title">📱 الأجهزة المتصلة:</div>
+            <div class="devices-grid" id="devicesGrid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📡</div>
+                    <div>في انتظار اتصال الأجهزة...</div>
+                    <div style="margin-top: 10px; color: #ccc; font-size: 0.9em;">
+                        شارك الرابط مع التلاميذ ليبدأوا بالتسجيل
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-buttons">
+            <button class="btn btn-clear" onclick="clearAllDevices()">🗑️ مسح جميع الأجهزة</button>
+        </div>
+    </div>
+
+    <script>
+        let isMonitorView = false;
+        let totalConnected = 0;
+        let dataTransfer = 0;
+        let autoRefreshInterval = null;
+
+        // تبديل بين الواجهتين
+        function toggleView() {
+            isMonitorView = !isMonitorView;
+            const studentView = document.getElementById('studentView');
+            const monitorView = document.getElementById('monitorView');
+            const btnText = document.getElementById('btnText');
+            const toggleBtn = document.getElementById('toggleBtn');
+
+            if (isMonitorView) {
+                // عرض المراقبة
+                studentView.style.display = 'none';
+                monitorView.classList.add('show');
+                btnText.textContent = '👥 عرض واجهة التلاميذ';
+                toggleBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                loadDevices();
+                startAutoRefresh();
+            } else {
+                // عرض التلاميذ
+                studentView.style.display = 'block';
+                monitorView.classList.remove('show');
+                btnText.textContent = '🎯 عرض المراقبة';
+                toggleBtn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                stopAutoRefresh();
+            }
+        }
+
+        // تسجيل جهاز جديد
+        function registerDevice(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('studentName').value;
+            const device = document.getElementById('deviceType').value;
+            
+            const deviceData = {
+                id: Date.now(),
+                name: name,
+                device: device,
+                time: new Date().toLocaleTimeString('ar-DZ'),
+                date: new Date().toLocaleDateString('ar-DZ'),
+                mac: generateMAC(),
+                ip: '192.168.1.' + (Math.floor(Math.random() * 150) + 100),
+                os: device.toLowerCase().includes('iphone') || device.toLowerCase().includes('ios') ? 'iOS 17' : 'Android 14',
+                browser: getBrowserInfo()
+            };
+            
+            // حفظ الجهاز
+            let devices = JSON.parse(localStorage.getItem('wifiDevices')) || [];
+            devices.push(deviceData);
+            localStorage.setItem('wifiDevices', JSON.stringify(devices));
+            
+            // إظهار رسالة النجاح
+            document.getElementById('successMsg').classList.add('show');
+            document.getElementById('connectForm').style.display = 'none';
+            
+            return false;
+        }
+
+        // تحميل الأجهزة
+        function loadDevices() {
+            const devices = JSON.parse(localStorage.getItem('wifiDevices')) || [];
+            const devicesGrid = document.getElementById('devicesGrid');
+            
+            if (devices.length === 0) {
+                devicesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📡</div>
+                        <div>في انتظار اتصال الأجهزة...</div>
+                        <div style="margin-top: 10px; color: #ccc; font-size: 0.9em;">
+                            شارك الرابط مع التلاميذ ليبدأوا بالتسجيل
+                        </div>
+                    </div>
+                `;
+                document.getElementById('totalConnected').textContent = '0';
+                document.getElementById('activeNow').textContent = '0';
+                document.getElementById('dataTransfer').textContent = '0 MB';
+                return;
+            }
+            
+            devicesGrid.innerHTML = '';
+            totalConnected = devices.length;
+            dataTransfer = devices.length * (Math.floor(Math.random() * 30) + 20);
+            
+            document.getElementById('totalConnected').textContent = totalConnected;
+            document.getElementById('activeNow').textContent = totalConnected;
+            document.getElementById('dataTransfer').textContent = dataTransfer + ' MB';
+            
+            devices.reverse().forEach((device, index) => {
+                const isNew = (Date.now() - device.id) < 10000;
+                
+                const deviceCard = document.createElement('div');
+                deviceCard.className = 'device-card';
+                deviceCard.innerHTML = `
+                    <div class="device-header">
+                        <div>
+                            ${isNew ? '<span class="new-badge">🆕 جديد</span>' : ''}
+                            <div class="device-name">${device.name}</div>
+                        </div>
+                        <div class="device-time">${device.time}</div>
+                    </div>
+                    <div class="device-info">
+                        <div class="device-info-item">
+                            <span class="info-label">📱 الجهاز:</span>
+                            <span class="info-value">${device.device}</span>
+                        </div>
+                        <div class="device-info-item">
+                            <span class="info-label">💻 MAC Address:</span>
+                            <span class="info-value">${device.mac}</span>
+                        </div>
+                        <div class="device-info-item">
+                            <span class="info-label">🌐 IP Address:</span>
+                            <span class="info-value">${device.ip}</span>
+                        </div>
+                        <div class="device-info-item">
+                            <span class="info-label">⚙️ نظام التشغيل:</span>
+                            <span class="info-value">${device.os}</span>
+                        </div>
+                        <div class="device-info-item">
+                            <span class="info-label">🌍 المتصفح:</span>
+                            <span class="info-value">${device.browser}</span>
+                        </div>
+                    </div>
+                `;
+                
+                devicesGrid.appendChild(deviceCard);
+            });
+        }
+
+        // إشعار جهاز جديد
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // تحديث تلقائي
+        function startAutoRefresh() {
+            let lastCount = JSON.parse(localStorage.getItem('wifiDevices') || '[]').length;
+            
+            autoRefreshInterval = setInterval(() => {
+                const devices = JSON.parse(localStorage.getItem('wifiDevices')) || [];
+                if (devices.length > lastCount) {
+                    showNotification();
+                    loadDevices();
+                }
+                lastCount = devices.length;
+            }, 2000); // كل 2 ثانية
+        }
+
+        // إيقاف التحديث التلقائي
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // مسح جميع الأجهزة
+        function clearAllDevices() {
+            if (confirm('⚠️ هل أنت متأكد من مسح جميع الأجهزة المتصلة؟\nهذا الإجراء لا يمكن التراجع عنه!')) {
+                localStorage.removeItem('wifiDevices');
+                loadDevices();
+            }
+        }
+
+        // توليد MAC عشوائي
+        function generateMAC() {
+            let mac = '';
+            for (let i = 0; i < 6; i++) {
+                mac += Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase();
+                if (i < 5) mac += ':';
+            }
+            return mac;
+        }
+
+        // الحصول على معلومات المتصفح
+        function getBrowserInfo() {
+            const ua = navigator.userAgent;
+            if (ua.includes('Chrome')) return 'Google Chrome';
+            if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+            if (ua.includes('Firefox')) return 'Mozilla Firefox';
+            if (ua.includes('Edge')) return 'Microsoft Edge';
+            return 'Unknown Browser';
+        }
+    </script>
+</body>
+</html>
